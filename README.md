@@ -1,10 +1,10 @@
 # Foto ke Elemen
 
-Masukkan satu foto, hasilnya elemen-elemen vektor terpisah (XML/SVG) untuk Alight Motion. Semua proses di browser, tanpa build.
+Masukkan satu foto, semua objeknya dipotong jadi bagian terpisah dari foto asli (piksel tidak diubah). Hasil: satu file XML berisi semua elemen, plus PNG transparan tiap elemen di ZIP. Semua proses di browser, tanpa build.
 
 Isi: `index.html`, `style.css`, `script.js`
 
-Jalankan: buka `index.html` di browser.
+Format XML: tiap `<elemen>` punya `x`, `y`, `lebar`, `tinggi` (posisi di foto) dan isi PNG base64.
 
 Push ke GitHub:
 ```bash
