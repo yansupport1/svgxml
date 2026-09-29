@@ -27,8 +27,9 @@ h1{margin:6px 0 0;font-size:clamp(28px,6vw,48px);font-weight:700;letter-spacing:
 .fr{border-radius:14px;overflow:hidden;background:repeating-conic-gradient(rgba(255,255,255,.07) 0 25%,transparent 0 50%) 0 0/14px 14px;border:1px solid var(--ln);display:grid;place-items:center}
 .fr svg,.fr img{display:block;width:100%;height:auto;max-height:440px;object-fit:contain}
 .stk{position:relative;aspect-ratio:var(--ar);width:min(100%,calc(60vh*var(--ar)));margin:0 auto}
-.fr .stk img{position:absolute;max-height:none;object-fit:fill;transition:opacity .15s}
-#pv.dim img{opacity:.1}#pv.dim img.hl{opacity:1}
+.fr .stk svg{width:100%;height:100%;max-height:none}
+#pv path{transition:opacity .15s}
+#pv.dim path{opacity:.1}#pv.dim path.hl{opacity:1}
 h3{margin:0 0 10px;font-size:14px;font-weight:600}
 .hint{color:var(--mut);font-weight:300;font-size:13px}
 .st{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:14px;color:var(--mut);margin-bottom:14px}.st b{color:var(--tx);font-weight:600}
@@ -40,4 +41,4 @@ h3{margin:0 0 10px;font-size:14px;font-weight:600}
 #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px;max-height:340px;overflow:auto;padding:2px}
 .th{aspect-ratio:1;padding:4px;border-radius:12px;cursor:pointer;background:rgba(255,255,255,.05);border:1px solid var(--ln)}
 .th:hover,.th:focus-visible{border-color:var(--cy);box-shadow:0 0 18px color-mix(in srgb,var(--cy) 45%,transparent)}
-.th img{width:100%;height:100%;object-fit:contain;display:block}
+.th svg{width:100%;height:100%;display:block}

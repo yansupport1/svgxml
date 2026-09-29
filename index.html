@@ -11,7 +11,7 @@
 <main>
   <header>
     <h1>Foto ke Elemen</h1>
-    <p class="sub">Masukkan satu foto. Semua objeknya dipotong jadi bagian terpisah dari foto asli, tanpa mengubah gambar.</p>
+    <p class="sub">Auto trace: masukkan satu foto, semua objeknya ditelusuri jadi shape vektor terpisah di file XML untuk Alight Motion.</p>
   </header>
 
   <label class="pn" id="drop" for="file" tabindex="0">
@@ -25,22 +25,23 @@
   <div id="res" class="hide" style="display:grid;gap:18px">
     <section class="pv">
       <div class="pn"><h3>Foto asli</h3><div class="fr"><img id="orig" alt="Foto asli"></div></div>
-      <div class="pn"><h3>Hasil (elemen terpisah)</h3><div class="fr"><div id="pv" class="stk"></div></div></div>
+      <div class="pn"><h3>Hasil (seperti di Alight Motion)</h3><div class="fr"><div id="pv" class="stk"></div></div></div>
     </section>
     <section class="pn">
       <div class="st" id="st"></div>
       <div class="acts">
-        <button class="bt" id="bx">Unduh XML</button>
-        <button class="bt" id="bz">Unduh ZIP (XML + PNG tiap elemen)</button>
+        <button class="bt" id="bx">Unduh XML Alight Motion</button>
+        <button class="bt" id="bz">Unduh ZIP (XML per elemen)</button>
       </div>
     </section>
     <section class="pn">
-      <h3>Daftar elemen <span class="hint">· arahkan untuk menyorot, ketuk untuk unduh PNG-nya</span></h3>
+      <h3>Daftar elemen <span class="hint">· arahkan untuk menyorot, ketuk untuk unduh XML-nya</span></h3>
       <div id="grid"></div>
     </section>
   </div>
 </main>
 
+<script src="vendor_imagetracer.js"></script>
 <script src="script.js" defer></script>
 </body>
 </html>
