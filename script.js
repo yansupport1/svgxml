@@ -52,7 +52,7 @@ async function run(img){
     els=[];re.lastIndex=0;let m,n=0;
     while((m=re.exec(svgStr))){
       n++;
-      els.push({n,color:rgbToHex(m[1],m[2],m[3]),alpha:Math.round(parseFloat(m[4])*255),d:toAmPath(m[5])});
+      els.push({n,color:rgbToHex(m[1],m[2],m[3]),alpha:Math.round(parseFloat(m[4])*255),d:m[5].trim().replace(/\s+/g,' ')});
     }
     if(els.length<=CAP||p===presets.length-1)break;
     await tick();
@@ -62,46 +62,38 @@ async function run(img){
   await render();
 }
 
-// path ImageTracer ("M x y L x y Q x y x y Z") -> format Alight Motion ("Mx,y Lx,y Qx,y x,y Z")
+// path SVG standar -> format asli Alight Motion (dikonfirmasi dari file export AM sungguhan):
+// "M x yL x yL x y...L x0 y0" - spasi tanpa koma, huruf nempel ke angka sebelumnya, tanpa Z (titik awal diulang di akhir)
 function toAmPath(d){
   const tok=d.match(/[MLQZ]|-?\d*\.?\d+(?:e-?\d+)?/g)||[];
-  let out=[],i=0;
+  let out='',i=0,sx=null,sy=null;
   while(i<tok.length){
     const c=tok[i];
-    if(c==='Z'){out.push('Z');i++;continue}
-    if(c==='M'||c==='L'){out.push(c+tok[i+1]+','+tok[i+2]);i+=3;continue}
-    if(c==='Q'){out.push('Q'+tok[i+1]+','+tok[i+2]+' '+tok[i+3]+','+tok[i+4]);i+=5;continue}
+    if(c==='M'){sx=tok[i+1];sy=tok[i+2];out+='M '+sx+' '+sy;i+=3;continue}
+    if(c==='L'){out+='L '+tok[i+1]+' '+tok[i+2];i+=3;continue}
+    if(c==='Q'){out+='Q '+tok[i+1]+' '+tok[i+2]+' '+tok[i+3]+' '+tok[i+4];i+=5;continue}
+    if(c==='Z'){if(sx!=null)out+='L '+sx+' '+sy;i++;continue}
     i++;
   }
-  return out.join(' ');
+  return out;
 }
 
-const hx8=(c,a)=>'#'+(a==null?255:a).toString(16).padStart(2,'0').toUpperCase()+c.slice(1).toUpperCase();
-const shapeXml=(e,id,parent)=>`  <shape id="${id}"${parent?` parent="${parent}"`:``} label="Elemen ${pad(e.n)}" startTime="0" endTime="${DUR}" fillType="color" mediaFillMode="stretch">
+const hx8=(c,a)=>'#'+(a==null?255:a).toString(16).padStart(2,'0')+c.slice(1).toLowerCase();
+const shapeXml=(e,id)=>`  <shape id="${id}" label="Elemen ${pad(e.n)}" startTime="0" endTime="${DUR}" fillType="color" mediaFillMode="fill">
     <transform>
       <location value="0.000000,0.000000,0.000000"/>
     </transform>
     <fillColor value="${hx8(e.color,e.alpha)}"/>
-    <parameter>
-      <contour d="${e.d}"/>
-    </parameter>
+    <path d="${toAmPath(e.d)}"/>
   </shape>
 `;
-const groupXml=(gid,label)=>`  <nullobj id="${gid}" label="${esc(label)}" startTime="0" endTime="${DUR}">
-    <transform>
-      <location value="0.000000,0.000000,0.000000"/>
-    </transform>
-  </nullobj>
-`;
-const sceneXml=(list,title,group)=>{
-  const gid=group?1:0,off=group?1:0;
-  return `<?xml version="1.0" encoding="UTF-8"?>
+const sceneXml=(list,title)=>`<?xml version="1.0" encoding="UTF-8"?>
 <scene title="${esc(title)}" width="${CW}" height="${CH}" exportWidth="${CW}" exportHeight="${CH}" bgcolor="${hx8(bg)}" totalTime="${DUR}" fps="30" modifiedTime="${Date.now()}" amver="1028425" ffver="106" am="com.alightcreative.motion/5.0.273.1028425" amplatform="android">
-${group?groupXml(gid,title):''}${list.map((e,i)=>shapeXml(e,i+1+off,group?gid:null)).join('')}</scene>
-`;};
+${list.map((e,i)=>shapeXml(e,i+1)).join('')}</scene>
+`;
 
 async function render(){
-  xmlAll=sceneXml(els,base,true);
+  xmlAll=sceneXml(els,base);
   $('#res').classList.remove('hide');
   const pv=$('#pv');pv.style.setProperty('--ar',CW/CH);pv.className='stk';
   pv.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${CW} ${CH}"><rect width="${CW}" height="${CH}" fill="${bg}"/>${els.map(e=>`<path data-n="${e.n}" fill="${e.color}" fill-opacity="${(e.alpha/255).toFixed(3)}" d="${e.d}"/>`).join('')}</svg>`;
@@ -114,7 +106,7 @@ async function render(){
     const on=()=>{pv.classList.add('dim');const t=pv.querySelector(`path[data-n="${e.n}"]`);t&&t.classList.add('hl')};
     const off=()=>{pv.classList.remove('dim');pv.querySelectorAll('.hl').forEach(x=>x.classList.remove('hl'))};
     b.onmouseenter=on;b.onfocus=on;b.onmouseleave=off;b.onblur=off;
-    b.onclick=()=>save(`${base}-elemen-${pad(e.n)}.xml`,new Blob([sceneXml([e],base+' '+pad(e.n),false)],{type:'application/xml'}));
+    b.onclick=()=>save(`${base}-elemen-${pad(e.n)}.xml`,new Blob([sceneXml([e],base+' '+pad(e.n))],{type:'application/xml'}));
     gr.appendChild(b);
   });
   $('#dt').textContent='Selesai. Ketuk untuk ganti foto';
@@ -147,6 +139,6 @@ function zip(files){
 }
 $('#bz').onclick=()=>{if(!els.length)return;
   const enc=new TextEncoder();
-  const files=[{name:'semua-elemen.xml',data:enc.encode(xmlAll)},...els.map(e=>({name:`elemen/${pad(e.n)}.xml`,data:enc.encode(sceneXml([e],base+' '+pad(e.n),false))}))];
+  const files=[{name:'semua-elemen.xml',data:enc.encode(xmlAll)},...els.map(e=>({name:`elemen/${pad(e.n)}.xml`,data:enc.encode(sceneXml([e],base+' '+pad(e.n)))}))];
   save(base+'-elemen.zip',zip(files));
 };
