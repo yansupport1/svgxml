@@ -1,6 +1,6 @@
 const $=s=>document.querySelector(s);
 let els=[],CW=0,CH=0,base='foto',bg='#ffffff',fsize=0,xmlAll='';
-const CAN=1080,SEG=800,DUR=5000;
+const CAN=1080,SEG=1000,DUR=5000;
 const pad=n=>String(n).padStart(3,'0');
 const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const tick=()=>new Promise(r=>setTimeout(r,0));
@@ -33,12 +33,12 @@ async function run(img){
   const cx=cv.getContext('2d',{willReadFrequently:true});cx.drawImage(img,0,0,W,H);
   const imgd=cx.getImageData(0,0,W,H);
   await tick();
-  const CAP=260; // batas jumlah elemen supaya tidak lag di Alight Motion
+  const CAP=700; // batas jumlah elemen (dinaikkan supaya detail & warna lebih setia ke foto asli)
   const presets=[
-    {ltres:1,qtres:1,pathomit:6,rightangleenhance:true,colorsampling:2,numberofcolors:16,mincolorratio:0.004,colorquantcycles:3,layering:0,strokewidth:0,linefilter:false,roundcoords:2,viewbox:false,desc:false,blurradius:1,blurdelta:20},
-    {ltres:1,qtres:1,pathomit:10,rightangleenhance:true,colorsampling:2,numberofcolors:12,mincolorratio:0.01,colorquantcycles:3,layering:0,strokewidth:0,linefilter:false,roundcoords:2,viewbox:false,desc:false,blurradius:1,blurdelta:20},
-    {ltres:1.5,qtres:1.5,pathomit:16,rightangleenhance:true,colorsampling:2,numberofcolors:10,mincolorratio:0.02,colorquantcycles:3,layering:0,strokewidth:0,linefilter:false,roundcoords:2,viewbox:false,desc:false,blurradius:2,blurdelta:24},
-    {ltres:2,qtres:2,pathomit:24,rightangleenhance:true,colorsampling:2,numberofcolors:8,mincolorratio:0.03,colorquantcycles:3,layering:0,strokewidth:0,linefilter:false,roundcoords:2,viewbox:false,desc:false,blurradius:2,blurdelta:24},
+    {ltres:0.5,qtres:0.5,pathomit:3,rightangleenhance:true,colorsampling:2,numberofcolors:32,mincolorratio:0.0008,colorquantcycles:4,layering:0,strokewidth:0,linefilter:false,roundcoords:2,viewbox:false,desc:false,blurradius:0,blurdelta:20},
+    {ltres:0.7,qtres:0.7,pathomit:4,rightangleenhance:true,colorsampling:2,numberofcolors:24,mincolorratio:0.002,colorquantcycles:3,layering:0,strokewidth:0,linefilter:false,roundcoords:2,viewbox:false,desc:false,blurradius:0,blurdelta:20},
+    {ltres:1,qtres:1,pathomit:6,rightangleenhance:true,colorsampling:2,numberofcolors:18,mincolorratio:0.005,colorquantcycles:3,layering:0,strokewidth:0,linefilter:false,roundcoords:2,viewbox:false,desc:false,blurradius:1,blurdelta:20},
+    {ltres:1.5,qtres:1.5,pathomit:10,rightangleenhance:true,colorsampling:2,numberofcolors:14,mincolorratio:0.01,colorquantcycles:3,layering:0,strokewidth:0,linefilter:false,roundcoords:2,viewbox:false,desc:false,blurradius:1,blurdelta:20},
   ];
   const re=/<path[^>]*?fill="rgb\((\d+),(\d+),(\d+)\)"[^>]*?opacity="([^"]+)"[^>]*?d="([^"]*)"/g;
   let SC=1,options=presets[0];
