@@ -64,29 +64,43 @@ async function run(img){
 
 // path SVG standar -> format asli Alight Motion (dikonfirmasi dari file export AM sungguhan):
 // "M x yL x yL x y...L x0 y0" - spasi tanpa koma, huruf nempel ke angka sebelumnya, tanpa Z (titik awal diulang di akhir)
-function toAmPath(d){
+function bboxOf(d){
+  const tok=d.match(/-?\d*\.?\d+(?:e-?\d+)?/g)||[];
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  for(let i=0;i<tok.length;i+=2){const x=+tok[i],y=+tok[i+1];if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+  return{cx:(x0+x1)/2,cy:(y0+y1)/2};
+}
+function toAmPath(d,ox,oy){
   const tok=d.match(/[MLQZ]|-?\d*\.?\d+(?:e-?\d+)?/g)||[];
-  let out='',i=0,sx=null,sy=null;
+  const r=v=>(v).toFixed(2);
+  let out='',i=0,sx=null,sy=null,cx=0,cy=0;
+  const N=4; // segmen perkiraan untuk tiap kurva Q (diratakan jadi garis lurus)
   while(i<tok.length){
     const c=tok[i];
-    if(c==='M'){sx=tok[i+1];sy=tok[i+2];out+='M '+sx+' '+sy;i+=3;continue}
-    if(c==='L'){out+='L '+tok[i+1]+' '+tok[i+2];i+=3;continue}
-    if(c==='Q'){out+='Q '+tok[i+1]+' '+tok[i+2]+' '+tok[i+3]+' '+tok[i+4];i+=5;continue}
-    if(c==='Z'){if(sx!=null)out+='L '+sx+' '+sy;i++;continue}
+    if(c==='M'){cx=+tok[i+1]-ox;cy=+tok[i+2]-oy;sx=cx;sy=cy;out+='M '+r(cx)+' '+r(cy);i+=3;continue}
+    if(c==='L'){cx=+tok[i+1]-ox;cy=+tok[i+2]-oy;out+='L '+r(cx)+' '+r(cy);i+=3;continue}
+    if(c==='Q'){
+      const x1=+tok[i+1]-ox,y1=+tok[i+2]-oy,x2=+tok[i+3]-ox,y2=+tok[i+4]-oy;
+      for(let k=1;k<=N;k++){const t=k/N,u=1-t;out+='L '+r(u*u*cx+2*u*t*x1+t*t*x2)+' '+r(u*u*cy+2*u*t*y1+t*t*y2)}
+      cx=x2;cy=y2;i+=5;continue;
+    }
+    if(c==='Z'){if(sx!=null)out+='L '+r(sx)+' '+r(sy);cx=sx;cy=sy;i++;continue}
     i++;
   }
   return out;
 }
 
 const hx8=(c,a)=>'#'+(a==null?255:a).toString(16).padStart(2,'0')+c.slice(1).toLowerCase();
-const shapeXml=(e,id)=>`  <shape id="${id}" label="Elemen ${pad(e.n)}" startTime="0" endTime="${DUR}" fillType="color" mediaFillMode="fill">
+const shapeXml=(e,id)=>{
+  const{cx,cy}=bboxOf(e.d);
+  return `  <shape id="${id}" label="Elemen ${pad(e.n)}" startTime="0" endTime="${DUR}" fillType="color" mediaFillMode="fill">
     <transform>
-      <location value="0.000000,0.000000,0.000000"/>
+      <location value="${cx.toFixed(6)},${cy.toFixed(6)},0.000000"/>
     </transform>
     <fillColor value="${hx8(e.color,e.alpha)}"/>
-    <path d="${toAmPath(e.d)}"/>
+    <path d="${toAmPath(e.d,cx,cy)}"/>
   </shape>
-`;
+`;};
 const sceneXml=(list,title)=>`<?xml version="1.0" encoding="UTF-8"?>
 <scene title="${esc(title)}" width="${CW}" height="${CH}" exportWidth="${CW}" exportHeight="${CH}" bgcolor="${hx8(bg)}" totalTime="${DUR}" fps="30" modifiedTime="${Date.now()}" amver="1028425" ffver="106" am="com.alightcreative.motion/5.0.273.1028425" amplatform="android">
 ${list.map((e,i)=>shapeXml(e,i+1)).join('')}</scene>
