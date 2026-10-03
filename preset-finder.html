@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>AM Preset Finder</title>
+<link rel="stylesheet" href="preset-finder.css">
+</head>
+<body>
+<div class="orb o1"></div><div class="orb o2"></div>
+<main>
+  <a class="back" href="index.html">← Foto ke Elemen</a>
+  <header>
+    <h1>AM Preset Finder</h1>
+    <p class="sub">Tempel link TikTok yang berisi preset Alight Motion. Caption video dan bio akun akan dipindai otomatis untuk link preset (XML, Drive, Mega, dsb).</p>
+  </header>
+
+  <section class="glass">
+    <label for="link">Link TikTok</label>
+    <div class="row">
+      <input id="link" type="url" inputmode="url" placeholder="https://vt.tiktok.com/..." autocomplete="off">
+      <button id="go" class="bt">Cari</button>
+    </div>
+    <p class="hint" id="err"></p>
+  </section>
+
+  <section class="glass hide" id="loading">
+    <div class="scan"><span></span></div>
+    <p class="loadtext">Memindai video TikTok…</p>
+  </section>
+
+  <section class="glass hide" id="result">
+    <div class="who">
+      <div class="avatar">🎬</div>
+      <div>
+        <div id="rname">-</div>
+        <div class="hint" id="rurl"></div>
+      </div>
+    </div>
+    <div class="badges" id="checked"></div>
+    <div id="links"></div>
+    <p class="hint" id="note"></p>
+  </section>
+
+  <section class="glass">
+    <label for="manual">Tempel komentar (opsional)</label>
+    <p class="hint">TikTok tidak mengizinkan komentar dibaca otomatis. Salin teks komentar dari aplikasi TikTok, tempel di sini - akan ikut dipindai cari link-nya.</p>
+    <textarea id="manual" placeholder="Tempel teks komentar di sini..."></textarea>
+    <div class="acts"><button id="scanManual" class="bt ghost">Pindai teks ini</button></div>
+    <div id="manualLinks"></div>
+  </section>
+</main>
+<script src="preset-finder.js" defer></script>
+</body>
+</html>
